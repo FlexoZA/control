@@ -7,6 +7,5 @@
 #define IN3 4 //GPIO 4
 #define IN4 16 // GPIO 16
 
-//Stepper config
-int stepDelay = 1.1;  // Delay between steps in milliseconds
-int totalSteps = 2048;  // Full rotation for 28BYJ-48 (360 degrees)
+#define TotalSteps 4096 //Default for 28BYJ-48 (360 degrees)
+#define StepDelay 1.00
