@@ -1,7 +1,6 @@
 #pragma once
 
 // Define GPIO pins
-
 //Stepper1
 #define IN1 15 //GPIO 15
 #define IN2 2 //GPIO 2
