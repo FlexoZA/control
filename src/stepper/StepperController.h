@@ -7,6 +7,9 @@ public:
     // Constructor
     StepperController();
 
+    // Initialize stepper motor
+    void begin();
+
     // Rotate motor with specified steps and direction
     void rotate(int steps, bool clockwise);
 

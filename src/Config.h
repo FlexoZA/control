@@ -10,8 +10,11 @@
 #define TotalSteps 4096
 #define StepDelay 1.00
 
+// Filament sensor pin
+#define FILAMENT_SENSOR_PIN 32  // GPIO 32 for filament runout sensor
+
 // Printer Configuration
-#define PRINTER_IP "192.168.100.28"  // Replace with your printer's IP address
+#define PRINTER_IP "192.168.100.32"  // Replace with your printer's IP address
 #define Endpoint "/printer/objects/query?print_stats&display_status&webhooks"
 #define RESUME_ENDPOINT "/printer/print/resume"
 #define API_UPDATE_INTERVAL 10000  // Time in ms between API updates

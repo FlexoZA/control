@@ -2,12 +2,17 @@
 #include "stepper/StepperController.h"
 #include "API/ApiController.h"
 #include "comms/WifiController.h"
+#include "sensor/SensorController.h"
+#include "Config.h"
 
 WifiController wifi;
 ApiController apiController(PRINTER_IP, wifi);
 
 // Create a global stepper controller instance
 StepperController stepper;
+
+// Create a global sensor controller instance
+SensorController sensor(FILAMENT_SENSOR_PIN);
 
 // Variable to track last WiFi test time
 unsigned long lastWifiTestTime = 0;
@@ -22,53 +27,47 @@ void setup() {
     Serial.begin(115200);
     wifi.begin();
     apiController.begin();
+    stepper.begin();
 }
 
 void loop() {
     // Check and maintain WiFi connection
     wifi.checkConnection();
+
+    // Update sensor status
+    sensor.update();
     
+    // Get current printer state
+    if (apiController.getPrinterStatus()) {
+        currentState = apiController.getCurrentState();
+        
+        // Check if printer is paused and sensor is active
+        if (currentState == "paused" && sensor.getIsActive()) {
+            // Rotate stepper anticlockwise continuously until sensor becomes inactive
+            while (sensor.getIsActive()) {
+                stepper.rotate(100, false);  // false for anticlockwise
+                sensor.update();  // Update sensor status
+                delay(10);  // Small delay to prevent overwhelming the system
+            }
+            
+            // Wait for sensor to become active again
+            while (!sensor.getIsActive()) {
+                sensor.update();
+                delay(100);  // Check every 100ms
+            }
+            
+            // Once sensor is active again, rotate clockwise 360 degrees
+            stepper.rotate(TotalSteps, true);  // true for clockwise, TotalSteps for 360 degrees
+            
+            // Send resume command to printer
+            apiController.resumePrint();
+        }
+    }
+
     // Periodically test WiFi connection details
     unsigned long currentTime = millis();
     if (currentTime - lastWifiTestTime >= WIFI_TEST_INTERVAL) {
         wifi.testConnection();
         lastWifiTestTime = currentTime;
-    }
-
-    // Update printer status
-    apiController.updateStatus();
-    
-    // Get current printer state
-    if (apiController.getPrinterStatus()) {
-        currentState = apiController.getCurrentState();
-        Serial.print("Current State: ");
-        Serial.println(currentState);
-        
-        // If printer is paused and we haven't rotated yet
-        if (currentState == "paused" && !hasRotated) {
-            Serial.println("Printer paused - starting rotation sequence");
-            
-            // Rotate 360 degrees clockwise (4096 steps)
-            stepper.rotate(TotalSteps, true);
-            delay(1000); // Wait 1 second
-            
-            // Rotate 360 degrees counterclockwise
-            stepper.rotate(TotalSteps, false);
-            
-            // Mark that we've completed the rotation
-            Serial.println("Rotation complete");
-            hasRotated = true;
-            
-            // Resume the print
-            if (apiController.resumePrint()) {
-                Serial.println("Print resumed after rotation");
-            } else {
-                Serial.println("Failed to resume print");
-            }
-        }
-        // Reset the rotation flag if the printer is no longer paused
-        else if (currentState != "paused") {
-            hasRotated = false;
-        }
     }
 }

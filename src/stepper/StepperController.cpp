@@ -13,6 +13,16 @@ StepperController::StepperController()
     pinMode(IN4, OUTPUT);
 }
 
+// Initialize stepper motor
+void StepperController::begin() {
+    // Reset motor to initial state
+    setMotorState(0, 0, 0, 0);
+    
+    // Optional: Additional initialization like setting default speed
+    stepDelay = StepDelay;  // Ensure default delay
+    totalSteps = TotalSteps;  // Ensure default total steps
+}
+
 // Set motor coil states
 void StepperController::setMotorState(int a, int b, int c, int d) {
     digitalWrite(IN1, a);

@@ -38,12 +38,12 @@ bool ApiController::getPrinterStatus() {
         currentPrinterState = String(state);  // Store the state
         float completion = doc["result"]["status"]["display_status"]["progress"] | 0.0;
         
-        Serial.println("Printer Status:");
-        Serial.print("Print State: ");
-        Serial.println(currentPrinterState);
-        Serial.print("Progress: ");
-        Serial.print(completion * 100);
-        Serial.println("%");
+        //Serial.println("Printer Status:");
+        //Serial.print("Print State: ");
+        //Serial.println(currentPrinterState);
+        //Serial.print("Progress: ");
+        //Serial.print(completion * 100);
+        //Serial.println("%");
         
         http.end();
         return true;
